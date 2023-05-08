@@ -1,0 +1,7 @@
+#!/bin/sh
+
+rm -r .cadence
+rm -fr psf
+rm -f trueResults.data
+rm -fr signal design results ocean
+rm -f artSimEnvLog

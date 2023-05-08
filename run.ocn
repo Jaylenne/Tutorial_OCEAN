@@ -1,0 +1,57 @@
+simulator('spectre)
+design("./design/netlist")
+path("/opt/pdk/umc/umc18/ic61/UM180FDKMFC00000OA_B02_PB/Models/Spectre")
+modelFile(
+    '("mm180_reg33_v114.lib.scs" "tt")
+    '("mm180_reg18_v124.lib.scs" "tt")
+)
+temp(27)
+analysis('tran ?stop 321n ?errpreset "conservative")
+save( 'all )
+
+; apply multithread
+option(
+    'nthreads "4"
+    'multithread "on"
+)
+
+/*
+; Enable Spectre APS simulator
+option(
+    ?categ 'turboOpts
+    'proc_affinity "0-15"
+    'enable_proc_affinity t
+    'apsplus t
+)
+*/
+
+createDir("./results/psf")
+createDir("./results/simResults")
+
+for( i 0 2
+    resultsDir(sprintf(nil "./results/psf/runset%d" i)) ; save psf result of each weight value
+    load(sprintf(nil "./ocean/desVar%d.ocn" i)) ; load the weight value
+    run() ; run the simulation
+    selectResult('tran) ; select transient result
+
+    createDir(sprintf(nil "./results/simResults/runset%d" i))
+    fp1 = outfile(sprintf(nil "./results/simResults/runset%d/colCurrents.data" i) "w")
+    fp2 = outfile(sprintf(nil "./results/simResults/runset%d/mmResults.data" i) "w")
+
+    for( j 0 7
+        colCurrent = i(sprintf(nil "vcol%d:p" j)) ; get the column current
+        plot(colCurrent) ; plot the column current
+        ocnPrint(?output fp1 colCurrent) ; save the result
+        ; save the results after activation function exp() of each column at cycle time in a single file
+        ; each row is a column each col is a certain cycle
+        time = 20e-9
+        for( k 0 7
+            fprintf(fp2 "%0.6e\t" exp(value(colCurrent time)/20e-6))
+            time += 40e-9
+        );for
+        fprintf(fp2 "\n")
+    );for
+
+    close(fp1)
+    close(fp2) 
+);for

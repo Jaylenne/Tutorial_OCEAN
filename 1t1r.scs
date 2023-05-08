@@ -1,0 +1,7 @@
+subckt unit1t1r(TE TG BL GND)
+  parameters G=100u
+  R0 (TE net1) resistor r=1/G
+  M0 (net1 TG BL GND) n_33_mm w=3u l=340.0n nf=2 mis_flag=1 ad=1.26e-12 \
+        as=1.92e-12 pd=3.84u ps=7.28u m=(2)*(1) mf=(2)*(1)
+ends unit1t1r
+
